@@ -10,23 +10,19 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
+import argparse
 import warnings
+import numpy as np
 
-from ..models import Model
-from ..layers import Flatten
-from ..layers import Dense
-from ..layers import Input
-from ..layers import Conv2D
-from ..layers import MaxPooling2D
-from ..layers import GlobalAveragePooling2D
-from ..layers import GlobalMaxPooling2D
-from ..engine.topology import get_source_inputs
-from ..utils import layer_utils
-from ..utils.data_utils import get_file
-from .. import backend as K
-from .imagenet_utils import decode_predictions
-from .imagenet_utils import preprocess_input
-from .imagenet_utils import _obtain_input_shape
+from keras.models import Model
+from keras.layers import Flatten, Dense, Input, Conv2D, MaxPooling2D, GlobalAveragePooling2D, GlobalMaxPooling2D
+from keras.engine.topology import get_source_inputs
+from keras.utils import layer_utils
+from keras.utils.data_utils import get_file
+from keras import backend as K
+from keras.applications.imagenet_utils import decode_predictions, preprocess_input, _obtain_input_shape
+from keras.preprocessing import image
+from keras.preprocessing.image import load_img
 
 
 WEIGHTS_PATH = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg19_weights_tf_dim_ordering_tf_kernels.h5'
@@ -199,3 +195,22 @@ def VGG19(include_top=True, weights='imagenet',
         model.load_weights(weights)
 
     return model
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-content_img', default='data/content/stata.jpg')
+    parser.add_argument('-style_img', default='data/style/starry_night.jpg')
+    args = parser.parse_args()
+
+    content_image = load_img(args.content_img)
+    style_image = load_img(args.style_img)
+
+    x = image.img_to_array(content_image)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+
+    print("x: ", x.shape)
+
+
+
