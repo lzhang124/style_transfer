@@ -1,11 +1,8 @@
-import vgg
-
-import tensorflow as tf
 import numpy as np
-
-from sys import stderr
-
+import tensorflow as tf
+import vgg
 from PIL import Image
+from sys import stderr
 
 CONTENT_LAYERS = ('relu4_2', 'relu5_2')
 STYLE_LAYERS = ('relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1')
@@ -15,19 +12,13 @@ try:
 except NameError:
     from functools import reduce
 
-
 def stylize(network, initial, initial_noiseblend, content, styles, preserve_colors, iterations,
         content_weight, content_weight_blend, style_weight, style_layer_weight_exp, style_blend_weights, tv_weight,
-        learning_rate, beta1, beta2, epsilon, pooling,
-        print_iterations=None, checkpoint_iterations=None):
+        learning_rate, beta1, beta2, epsilon, pooling, print_iterations=None, checkpoint_iterations=None):
     """
-    Stylize images.
-
-    This function yields tuples (iteration, image); `iteration` is None
-    if this is the final image (the last iteration).  Other tuples are yielded
-    every `checkpoint_iterations` iterations.
-
-    :rtype: iterator[tuple[int|None,image]]
+    This function yields tuples (iteration, image).
+    `iteration` is None if this is the final image (the last iteration).
+    Other tuples are yielded every `checkpoint_iterations` iterations.
     """
     shape = (1,) + content.shape
     style_shapes = [(1,) + style.shape for style in styles]
@@ -87,10 +78,7 @@ def stylize(network, initial, initial_noiseblend, content, styles, preserve_colo
         net = vgg.net_preloaded(vgg_weights, image, pooling)
 
         # content loss
-        content_layers_weights = {}
-        content_layers_weights['relu4_2'] = content_weight_blend
-        content_layers_weights['relu5_2'] = 1.0 - content_weight_blend
-
+        content_layers_weights = {'relu4_2': content_weight_blend, 'relu5_2': 1.0 - content_weight_blend}
         content_loss = 0
         content_losses = []
         for content_layer in CONTENT_LAYERS:
@@ -188,12 +176,7 @@ def stylize(network, initial, initial_noiseblend, content, styles, preserve_colo
                         # 5
                         img_out = np.array(Image.fromarray(combined_yuv, 'YCbCr').convert('RGB'))
 
-
-                    yield (
-                        (None if last_step else i),
-                        img_out
-                    )
-
+                    yield ((None if last_step else i), img_out)
 
 def _tensor_size(tensor):
     from operator import mul

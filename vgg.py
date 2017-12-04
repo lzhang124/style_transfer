@@ -26,6 +26,7 @@ def net_preloaded(weights, input_image, pooling):
         kind = name[:4]
         if kind == 'conv':
             kernels, bias = weights[i][0][0][0][0]
+            # matconvnet: weights are [width, height, in_channels, out_channels]
             # tensorflow: weights are [height, width, in_channels, out_channels]
             kernels = np.transpose(kernels, (1, 0, 2, 3))
             bias = bias.reshape(-1)

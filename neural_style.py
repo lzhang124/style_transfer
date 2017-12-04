@@ -1,16 +1,11 @@
-import os
-
 import numpy as np
+import math
+import os
 import scipy.misc
-
+from argparse import ArgumentParser
+from PIL import Image
 from stylize import stylize
 
-import math
-from argparse import ArgumentParser
-
-from PIL import Image
-
-# default arguments
 CONTENT_WEIGHT = 5e0
 CONTENT_WEIGHT_BLEND = 1
 STYLE_WEIGHT = 5e2
@@ -22,7 +17,7 @@ BETA2 = 0.999
 EPSILON = 1e-08
 STYLE_SCALE = 1.0
 ITERATIONS = 1000
-VGG_PATH = 'imagenet-vgg-verydeep-19.mat'
+VGG_PATH = 'vgg19.mat'
 POOLING = 'max'
 
 def build_parser():
@@ -102,13 +97,12 @@ def build_parser():
             metavar='POOLING', default=POOLING)
     return parser
 
-
 def main():
     parser = build_parser()
     options = parser.parse_args()
 
     if not os.path.isfile(options.network):
-        parser.error("Network %s does not exist. (Did you forget to download it?)" % options.network)
+        parser.error("Network %s does not exist." % options.network)
 
     content_image = imread(options.content)
     style_images = [imread(style) for style in options.styles]
@@ -132,8 +126,7 @@ def main():
         style_blend_weights = [1.0/len(style_images) for _ in style_images]
     else:
         total_blend_weight = sum(style_blend_weights)
-        style_blend_weights = [weight/total_blend_weight
-                               for weight in style_blend_weights]
+        style_blend_weights = [weight/total_blend_weight for weight in style_blend_weights]
 
     initial = options.initial
     if initial is not None:
@@ -149,8 +142,7 @@ def main():
             initial = content_image
 
     if options.checkpoint_output and "%s" not in options.checkpoint_output:
-        parser.error("To save intermediate images, the checkpoint output "
-                     "parameter must contain `%s` (e.g. `foo%s.jpg`)")
+        parser.error("To save intermediate images, the checkpoint output parameter must contain `%s` (e.g. `foo%s.jpg`)")
 
     for iteration, image in stylize(
         network=options.network,
@@ -184,7 +176,6 @@ def main():
         if output_file:
             imsave(output_file, combined_rgb)
 
-
 def imread(path):
     img = scipy.misc.imread(path).astype(np.float)
     if len(img.shape) == 2:
@@ -194,7 +185,6 @@ def imread(path):
         # PNG with alpha channel
         img = img[:,:,:3]
     return img
-
 
 def imsave(path, img):
     img = np.clip(img, 0, 255).astype(np.uint8)
