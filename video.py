@@ -1,11 +1,47 @@
-import numpy as np
-import math
-import os
+import neural_style
 import scipy.misc
-from argparse import ArgumentParser
+import numpy as np
+from scipy import ndimage
 from PIL import Image
-from map_color import map_color
-from stylize import stylize
+import imageio
+import os
+import math
+from argparse import ArgumentParser
+
+def extractFrames(inGif, outFolder):
+    frame = Image.open(inGif)
+    nframes = 0
+    frames = []
+    while frame:
+        frame.save(outFolder+'/'+str(nframes)+'.png', 'PNG')
+        frames.append(frame)
+        nframes += 1
+        try:
+            frame.seek(nframes)
+        except EOFError:
+            break;
+    return frames
+
+def get_filenames(folder):
+    filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
+    def getint(name):
+        basename = name.split('.')[0]
+        return int(basename)
+    filenames.sort(key=getint)
+    return filenames
+
+def create_gif(name, inFolder):
+    filenames = get_filenames(inFolder)
+    images = []
+    for filename in filenames:
+        if filename.endswith(".png"): 
+            im = imageio.imread(inFolder+filename, 'PNG')
+            images.append(im)
+            continue
+        else:
+            continue
+    f = os.path.join(inFolder, name)
+    imageio.mimsave(f, images)
 
 CONTENT_WEIGHT = 5e0
 CONTENT_WEIGHT_BLEND = 1
@@ -101,102 +137,21 @@ def build_parser():
             metavar='POOLING', default=POOLING)
     return parser
 
-def main(parser, options):
-
-    if not os.path.isfile(options.network):
-        parser.error("Network %s does not exist." % options.network)
-
-    content_image = imread(options.content)
-    style_images = [imread(style) for style in options.styles]
-
-    width = options.width
-    if width is not None:
-        new_shape = (int(math.floor(float(content_image.shape[0]) /
-                content_image.shape[1] * width)), width)
-        content_image = scipy.misc.imresize(content_image, new_shape)
-    target_shape = content_image.shape
-    for i in range(len(style_images)):
-        style_scale = STYLE_SCALE
-        if options.style_scales is not None:
-            style_scale = options.style_scales[i]
-        style_images[i] = scipy.misc.imresize(style_images[i], style_scale *
-                target_shape[1] / style_images[i].shape[1])
-
-    style_blend_weights = options.style_blend_weights
-    if style_blend_weights is None:
-        # default is equal weights
-        style_blend_weights = [1.0/len(style_images) for _ in style_images]
-    else:
-        total_blend_weight = sum(style_blend_weights)
-        style_blend_weights = [weight/total_blend_weight for weight in style_blend_weights]
-
-    initial = options.initial
-    if initial is not None:
-        initial = scipy.misc.imresize(imread(initial), content_image.shape[:2])
-        # Initial guess is specified, but not noiseblend - no noise should be blended
-        if options.initial_noiseblend is None:
-            options.initial_noiseblend = 0.0
-    else:
-        # Neither inital, nor noiseblend is provided, falling back to random generated initial guess
-        if options.initial_noiseblend is None:
-            options.initial_noiseblend = 1.0
-        if options.initial_noiseblend < 1.0:
-            initial = content_image
-
-    if options.checkpoint_output and "%s" not in options.checkpoint_output:
-        parser.error("To save intermediate images, the checkpoint output parameter must contain `%s` (e.g. `foo%s.jpg`).")
-
-    if options.map_colors:
-        for i in range(len(style_images)):
-            style_images[i] = map_color(content_image, style_images[i], options.map_colors)
-
-    for iteration, image in stylize(
-        network=options.network,
-        initial=initial,
-        initial_noiseblend=options.initial_noiseblend,
-        content=content_image,
-        styles=style_images,
-        luminance_transfer=options.luminance_transfer,
-        iterations=options.iterations,
-        content_weight=options.content_weight,
-        content_weight_blend=options.content_weight_blend,
-        style_weight=options.style_weight,
-        style_layer_weight_exp=options.style_layer_weight_exp,
-        style_blend_weights=style_blend_weights,
-        tv_weight=options.tv_weight,
-        learning_rate=options.learning_rate,
-        beta1=options.beta1,
-        beta2=options.beta2,
-        epsilon=options.epsilon,
-        pooling=options.pooling,
-        print_iterations=options.print_iterations,
-        checkpoint_iterations=options.checkpoint_iterations
-    ):
-        output_file = None
-        combined_rgb = image
-        if iteration is not None:
-            if options.checkpoint_output:
-                output_file = options.checkpoint_output % iteration
-        else:
-            output_file = options.output
-        if output_file:
-            imsave(output_file, combined_rgb)
-
-def imread(path):
-    img = scipy.misc.imread(path).astype(np.float)
-    if len(img.shape) == 2:
-        # grayscale
-        img = np.dstack((img,img,img))
-    elif img.shape[2] == 4:
-        # PNG with alpha channel
-        img = img[:,:,:3]
-    return img
-
-def imsave(path, img):
-    img = np.clip(img, 0, 255).astype(np.uint8)
-    Image.fromarray(img).save(path, quality=95)
 
 if __name__ == '__main__':
+    # frames = extractFrames("content/panda.gif", "content/panda/tmp")
+    prefix = "content/panda/tmp/"
+    frames = get_filenames(prefix)
     parser = build_parser()
     options = parser.parse_args()
-    main(parser, options)
+
+    options.initial = None
+    options.content = prefix+frames[0]
+    options.output = "content/panda/tmp/fp_0.jpg"
+    for i in range(1,len(frames)):
+        neural_style.main(parser, options)
+        options.initial = prefix+frames[i-1]
+        options.content = prefix+frames[i]
+        options.output = "content/panda/tmp/fp_"+str(i)+".jpg"
+
+
