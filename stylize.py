@@ -12,7 +12,7 @@ try:
 except NameError:
     from functools import reduce
 
-def stylize(network, initial, initial_noiseblend, content, styles, preserve_colors, iterations,
+def stylize(network, initial, initial_noiseblend, content, styles, luminance_transfer, iterations,
         content_weight, content_weight_blend, style_weight, style_layer_weight_exp, style_blend_weights, tv_weight,
         learning_rate, beta1, beta2, epsilon, pooling, print_iterations=None, checkpoint_iterations=None):
     """
@@ -145,7 +145,7 @@ def stylize(network, initial, initial_noiseblend, content, styles, preserve_colo
 
                     img_out = vgg.unprocess(best.reshape(shape[1:]), vgg_mean_pixel)
 
-                    if preserve_colors and preserve_colors == True:
+                    if luminance_transfer and luminance_transfer == True:
                         original_image = np.clip(content, 0, 255)
                         styled_image = np.clip(img_out, 0, 255)
 
@@ -162,8 +162,8 @@ def stylize(network, initial, initial_noiseblend, content, styles, preserve_colo
                         original_yuv = np.array(Image.fromarray(original_image.astype(np.uint8)).convert('YCbCr'))
 
                         # 3
-                        w, h, _ = original_image.shape
-                        combined_yuv = np.empty((w, h, 3), dtype=np.uint8)
+                        h, w, _ = original_image.shape
+                        combined_yuv = np.empty((h, w, 3), dtype=np.uint8)
                         combined_yuv[..., 0] = styled_grayscale_yuv[..., 0]
                         combined_yuv[..., 1] = original_yuv[..., 1]
                         combined_yuv[..., 2] = original_yuv[..., 2]

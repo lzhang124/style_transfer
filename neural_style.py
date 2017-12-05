@@ -4,6 +4,7 @@ import os
 import scipy.misc
 from argparse import ArgumentParser
 from PIL import Image
+from map_color import map_color
 from stylize import stylize
 
 CONTENT_WEIGHT = 5e0
@@ -90,8 +91,11 @@ def build_parser():
     parser.add_argument('--initial-noiseblend', type=float,
             dest='initial_noiseblend', help='ratio of blending initial image with normalized noise (if no initial image specified, content image is used) (default %(default)s)',
             metavar='INITIAL_NOISEBLEND')
-    parser.add_argument('--preserve-colors', action='store_true',
-            dest='preserve_colors', help='style-only transfer (preserving colors) - if color transfer is not needed')
+    parser.add_argument('--map-colors',
+            dest='map_colors', help='algorithm for mapping content colors to style image',
+            metavar='MAP_COLORS')
+    parser.add_argument('--luminance-transfer', action='store_true',
+            dest='luminance-transfer', help='luminance transfer after style transfer')
     parser.add_argument('--pooling',
             dest='pooling', help='pooling layer configuration: max or avg (default %(default)s)',
             metavar='POOLING', default=POOLING)
@@ -142,39 +146,44 @@ def main():
             initial = content_image
 
     if options.checkpoint_output and "%s" not in options.checkpoint_output:
-        parser.error("To save intermediate images, the checkpoint output parameter must contain `%s` (e.g. `foo%s.jpg`)")
+        parser.error("To save intermediate images, the checkpoint output parameter must contain `%s` (e.g. `foo%s.jpg`).")
 
-    for iteration, image in stylize(
-        network=options.network,
-        initial=initial,
-        initial_noiseblend=options.initial_noiseblend,
-        content=content_image,
-        styles=style_images,
-        preserve_colors=options.preserve_colors,
-        iterations=options.iterations,
-        content_weight=options.content_weight,
-        content_weight_blend=options.content_weight_blend,
-        style_weight=options.style_weight,
-        style_layer_weight_exp=options.style_layer_weight_exp,
-        style_blend_weights=style_blend_weights,
-        tv_weight=options.tv_weight,
-        learning_rate=options.learning_rate,
-        beta1=options.beta1,
-        beta2=options.beta2,
-        epsilon=options.epsilon,
-        pooling=options.pooling,
-        print_iterations=options.print_iterations,
-        checkpoint_iterations=options.checkpoint_iterations
-    ):
-        output_file = None
-        combined_rgb = image
-        if iteration is not None:
-            if options.checkpoint_output:
-                output_file = options.checkpoint_output % iteration
-        else:
-            output_file = options.output
-        if output_file:
-            imsave(output_file, combined_rgb)
+    if options.map_colors:
+        for i in range(len(style_images)):
+            style_images[i] = map_color(content_image, style_images[i], options.map_colors)
+
+    # for iteration, image in stylize(
+    #     network=options.network,
+    #     initial=initial,
+    #     initial_noiseblend=options.initial_noiseblend,
+    #     content=content_image,
+    #     styles=style_images,
+    #     luminance_transfer=options.luminance_transfer,
+    #     iterations=options.iterations,
+    #     content_weight=options.content_weight,
+    #     content_weight_blend=options.content_weight_blend,
+    #     style_weight=options.style_weight,
+    #     style_layer_weight_exp=options.style_layer_weight_exp,
+    #     style_blend_weights=style_blend_weights,
+    #     tv_weight=options.tv_weight,
+    #     learning_rate=options.learning_rate,
+    #     beta1=options.beta1,
+    #     beta2=options.beta2,
+    #     epsilon=options.epsilon,
+    #     pooling=options.pooling,
+    #     print_iterations=options.print_iterations,
+    #     checkpoint_iterations=options.checkpoint_iterations
+    # ):
+    #     output_file = None
+    #     combined_rgb = image
+    #     if iteration is not None:
+    #         if options.checkpoint_output:
+    #             output_file = options.checkpoint_output % iteration
+    #     else:
+    #         output_file = options.output
+    #     if output_file:
+    #         imsave(output_file, combined_rgb)
+    imsave(options.output, style_images[0])
 
 def imread(path):
     img = scipy.misc.imread(path).astype(np.float)
