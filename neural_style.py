@@ -152,38 +152,37 @@ def main():
         for i in range(len(style_images)):
             style_images[i] = map_color(content_image, style_images[i], options.map_colors)
 
-    # for iteration, image in stylize(
-    #     network=options.network,
-    #     initial=initial,
-    #     initial_noiseblend=options.initial_noiseblend,
-    #     content=content_image,
-    #     styles=style_images,
-    #     luminance_transfer=options.luminance_transfer,
-    #     iterations=options.iterations,
-    #     content_weight=options.content_weight,
-    #     content_weight_blend=options.content_weight_blend,
-    #     style_weight=options.style_weight,
-    #     style_layer_weight_exp=options.style_layer_weight_exp,
-    #     style_blend_weights=style_blend_weights,
-    #     tv_weight=options.tv_weight,
-    #     learning_rate=options.learning_rate,
-    #     beta1=options.beta1,
-    #     beta2=options.beta2,
-    #     epsilon=options.epsilon,
-    #     pooling=options.pooling,
-    #     print_iterations=options.print_iterations,
-    #     checkpoint_iterations=options.checkpoint_iterations
-    # ):
-    #     output_file = None
-    #     combined_rgb = image
-    #     if iteration is not None:
-    #         if options.checkpoint_output:
-    #             output_file = options.checkpoint_output % iteration
-    #     else:
-    #         output_file = options.output
-    #     if output_file:
-    #         imsave(output_file, combined_rgb)
-    imsave(options.output, style_images[0])
+    for iteration, image in stylize(
+        network=options.network,
+        initial=initial,
+        initial_noiseblend=options.initial_noiseblend,
+        content=content_image,
+        styles=style_images,
+        luminance_transfer=options.luminance_transfer,
+        iterations=options.iterations,
+        content_weight=options.content_weight,
+        content_weight_blend=options.content_weight_blend,
+        style_weight=options.style_weight,
+        style_layer_weight_exp=options.style_layer_weight_exp,
+        style_blend_weights=style_blend_weights,
+        tv_weight=options.tv_weight,
+        learning_rate=options.learning_rate,
+        beta1=options.beta1,
+        beta2=options.beta2,
+        epsilon=options.epsilon,
+        pooling=options.pooling,
+        print_iterations=options.print_iterations,
+        checkpoint_iterations=options.checkpoint_iterations
+    ):
+        output_file = None
+        combined_rgb = image
+        if iteration is not None:
+            if options.checkpoint_output:
+                output_file = options.checkpoint_output % iteration
+        else:
+            output_file = options.output
+        if output_file:
+            imsave(output_file, combined_rgb)
 
 def imread(path):
     img = scipy.misc.imread(path).astype(np.float)
