@@ -3,7 +3,7 @@ import scipy.misc
 import numpy as np
 from scipy import ndimage
 from PIL import Image
-import imageio
+# import imageio
 import os
 import math
 from argparse import ArgumentParser
@@ -30,18 +30,18 @@ def get_filenames(folder):
     filenames.sort(key=getint)
     return filenames
 
-def create_gif(name, inFolder):
-    filenames = get_filenames(inFolder)
-    images = []
-    for filename in filenames:
-        if filename.endswith(".png"): 
-            im = imageio.imread(inFolder+filename, 'PNG')
-            images.append(im)
-            continue
-        else:
-            continue
-    f = os.path.join(inFolder, name)
-    imageio.mimsave(f, images)
+# def create_gif(name, inFolder):
+#     filenames = get_filenames(inFolder)
+#     images = []
+#     for filename in filenames:
+#         if filename.endswith(".png"): 
+#             im = imageio.imread(inFolder+filename, 'PNG')
+#             images.append(im)
+#             continue
+#         else:
+#             continue
+#     f = os.path.join(inFolder, name)
+#     imageio.mimsave(f, images)
 
 CONTENT_WEIGHT = 5e0
 CONTENT_WEIGHT_BLEND = 1
