@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 
 try:
     reduce
@@ -13,7 +14,22 @@ def map_color(content, style, mapping):
         raise ValueError("Color mapping algorithm not implemented.")
     return globals()[mapping](content, style)
 
-def linear_eig(content, style):
+def rgb_lin(content, style):
+    flat_c = content.reshape(-1,3)
+    flat_s = style.reshape(-1,3)
+    mu_c = np.mean(flat_c, axis=0)
+    mu_s = np.mean(flat_s, axis=0)
+    std_c = np.std(flat_c, axis=0)
+    std_s = np.std(flat_s, axis=0)
+
+    h, w, _ = style.shape
+    mapped = np.zeros(style.shape)
+    for i in range(h):
+        for j in range(w):
+            mapped[i][j] = (std_c / std_s) * (style[i][j] - mu_s) + mu_c
+    return mapped
+
+def rgb_eig(content, style):
     flat_c = content.reshape(-1,3)
     flat_s = style.reshape(-1,3)
     mu_c = np.mean(flat_c, axis=0)
@@ -36,7 +52,7 @@ def linear_eig(content, style):
             mapped[i][j] = matmul(A, style[i][j]) + b
     return mapped
 
-def linear_chol(content, style):
+def rgb_chol(content, style):
     flat_c = content.reshape(-1,3)
     flat_s = style.reshape(-1,3)
     mu_c = np.mean(flat_c, axis=0)
@@ -55,4 +71,28 @@ def linear_chol(content, style):
     for i in range(h):
         for j in range(w):
             mapped[i][j] = matmul(A, style[i][j]) + b
+    return mapped
+
+def yuv_lin(content, style):
+    yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
+    yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
+    mapped = rgb_lin(yuv_content, yuv_style)
+    mapped = np.clip(mapped, 0, 255)
+    mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
+    return mapped
+
+def yuv_eig(content, style):
+    yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
+    yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
+    mapped = rgb_eig(yuv_content, yuv_style)
+    mapped = np.clip(mapped, 0, 255)
+    mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
+    return mapped
+
+def yuv_chol(content, style):
+    yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
+    yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
+    mapped = rgb_chol(yuv_content, yuv_style)
+    mapped = np.clip(mapped, 0, 255)
+    mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
     return mapped
