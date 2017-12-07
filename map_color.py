@@ -27,7 +27,7 @@ def rgb_lin(content, style):
     for i in range(h):
         for j in range(w):
             mapped[i][j] = (std_c / std_s) * (style[i][j] - mu_s) + mu_c
-    return mapped
+    return np.clip(mapped, 0, 255)
 
 def rgb_eig(content, style):
     flat_c = content.reshape(-1,3)
@@ -50,7 +50,7 @@ def rgb_eig(content, style):
     for i in range(h):
         for j in range(w):
             mapped[i][j] = matmul(A, style[i][j]) + b
-    return mapped
+    return np.clip(mapped, 0, 255)
 
 def rgb_chol(content, style):
     flat_c = content.reshape(-1,3)
@@ -71,13 +71,12 @@ def rgb_chol(content, style):
     for i in range(h):
         for j in range(w):
             mapped[i][j] = matmul(A, style[i][j]) + b
-    return mapped
+    return np.clip(mapped, 0, 255)
 
 def yuv_lin(content, style):
     yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
     yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
     mapped = rgb_lin(yuv_content, yuv_style)
-    mapped = np.clip(mapped, 0, 255)
     mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
     return mapped
 
@@ -85,7 +84,6 @@ def yuv_eig(content, style):
     yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
     yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
     mapped = rgb_eig(yuv_content, yuv_style)
-    mapped = np.clip(mapped, 0, 255)
     mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
     return mapped
 
@@ -93,6 +91,7 @@ def yuv_chol(content, style):
     yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
     yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
     mapped = rgb_chol(yuv_content, yuv_style)
-    mapped = np.clip(mapped, 0, 255)
     mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
     return mapped
+
+
