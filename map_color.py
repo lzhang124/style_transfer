@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from skimage import color
 
 try:
     reduce
@@ -9,12 +10,26 @@ except NameError:
 def matmul(*args):
     return reduce(np.matmul, args)
 
-def map_color(content, style, mapping):
-    if mapping not in globals() or mapping == 'map_color':
-        raise ValueError("Color mapping algorithm not implemented.")
-    return globals()[mapping](content, style)
+def rgb2color(colorspace, *images):
+    f = getattr(color, 'rgb2{}'.format(colorspace))
+    for image in images:
+        yield f(image.astype(np.float) / 255)
 
-def rgb_lin(content, style):
+def color2rgb(colorspace, *images):
+    f = getattr(color, '{}2rgb'.format(colorspace))
+    for image in images:
+        yield f(image.astype(np.float)) * 255
+
+def map_color(content, style, mapping):
+    colorspace, alg = mapping.split('-')
+    if colorspace != 'rgb':
+        content, style = rgb2color(colorspace, content, style)
+    mapped = globals()[alg](content, style)
+    if colorspace != 'rgb':
+        mapped, = color2rgb(colorspace, mapped)
+    return mapped
+
+def lin(content, style):
     flat_c = content.reshape(-1,3)
     flat_s = style.reshape(-1,3)
     mu_c = np.mean(flat_c, axis=0)
@@ -29,7 +44,7 @@ def rgb_lin(content, style):
             mapped[i][j] = (std_c / std_s) * (style[i][j] - mu_s) + mu_c
     return np.clip(mapped, 0, 255)
 
-def rgb_eig(content, style):
+def eig(content, style):
     flat_c = content.reshape(-1,3)
     flat_s = style.reshape(-1,3)
     mu_c = np.mean(flat_c, axis=0)
@@ -52,7 +67,7 @@ def rgb_eig(content, style):
             mapped[i][j] = matmul(A, style[i][j]) + b
     return np.clip(mapped, 0, 255)
 
-def rgb_chol(content, style):
+def chol(content, style):
     flat_c = content.reshape(-1,3)
     flat_s = style.reshape(-1,3)
     mu_c = np.mean(flat_c, axis=0)
@@ -72,26 +87,3 @@ def rgb_chol(content, style):
         for j in range(w):
             mapped[i][j] = matmul(A, style[i][j]) + b
     return np.clip(mapped, 0, 255)
-
-def yuv_lin(content, style):
-    yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
-    yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
-    mapped = rgb_lin(yuv_content, yuv_style)
-    mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
-    return mapped
-
-def yuv_eig(content, style):
-    yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
-    yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
-    mapped = rgb_eig(yuv_content, yuv_style)
-    mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
-    return mapped
-
-def yuv_chol(content, style):
-    yuv_content = np.array(Image.fromarray(content.astype(np.uint8)).convert('YCbCr'))
-    yuv_style = np.array(Image.fromarray(style.astype(np.uint8)).convert('YCbCr'))
-    mapped = rgb_chol(yuv_content, yuv_style)
-    mapped = np.array(Image.fromarray(mapped.astype(np.uint8), 'YCbCr').convert('RGB'))
-    return mapped
-
-
