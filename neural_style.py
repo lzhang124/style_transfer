@@ -95,7 +95,7 @@ def build_parser():
             dest='map_colors', help='algorithm for mapping content colors to style image',
             metavar='MAP_COLORS')
     parser.add_argument('--luminance-transfer', action='store_true',
-            dest='luminance-transfer', help='luminance transfer after style transfer')
+            dest='luminance_transfer', help='luminance transfer after style transfer')
     parser.add_argument('--pooling',
             dest='pooling', help='pooling layer configuration: max or avg (default %(default)s)',
             metavar='POOLING', default=POOLING)
