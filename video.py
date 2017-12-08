@@ -3,7 +3,6 @@ import scipy.misc
 import numpy as np
 from scipy import ndimage
 from PIL import Image
-# import imageio
 import os
 import math
 from argparse import ArgumentParser
@@ -124,23 +123,7 @@ def get_filenames(folder):
     filenames.sort(key=getint)
     return filenames
 
-def create_gif(name, inFolder):
-    filenames = get_filenames(inFolder)
-    images = []
-    for filename in filenames:
-        if filename.endswith(".jpg"): 
-            im = imageio.imread(inFolder+filename, 'JPG')
-            images.append(im)
-            continue
-        else:
-            continue
-    f = os.path.join(inFolder, name)
-    imageio.mimsave(f, images)
-
-# create_gif('panda.gif', 'content/panda/out2/')
-
 if __name__ == '__main__':
-    # frames = extractFrames("content/panda.gif", "content/panda/tmp")
     prefix = "content/panda/in/"
     frames = get_filenames(prefix)
     parser = build_parser()
@@ -157,3 +140,17 @@ if __name__ == '__main__':
     neural_style.main(parser, options)
 
 
+# import imageio
+# def create_gif(name, inFolder):
+#     filenames = get_filenames(inFolder)
+#     images = []
+#     for filename in filenames:
+#         if filename.endswith(".jpg"): 
+#             im = imageio.imread(inFolder+filename, 'JPG')
+#             images.append(im)
+#             continue
+#         else:
+#             continue
+#     f = os.path.join(inFolder, name)
+#     imageio.mimsave(f, images)
+# create_gif('panda.gif', 'content/panda/out2/')
