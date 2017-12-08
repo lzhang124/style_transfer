@@ -8,41 +8,6 @@ import os
 import math
 from argparse import ArgumentParser
 
-def extractFrames(inGif, outFolder):
-    frame = Image.open(inGif)
-    nframes = 0
-    frames = []
-    while frame:
-        frame.save(outFolder+'/'+str(nframes)+'.png', 'PNG')
-        frames.append(frame)
-        nframes += 1
-        try:
-            frame.seek(nframes)
-        except EOFError:
-            break;
-    return frames
-
-def get_filenames(folder):
-    filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
-    def getint(name):
-        basename = name.split('.')[0]
-        return int(basename)
-    filenames.sort(key=getint)
-    return filenames
-
-# def create_gif(name, inFolder):
-#     filenames = get_filenames(inFolder)
-#     images = []
-#     for filename in filenames:
-#         if filename.endswith(".png"): 
-#             im = imageio.imread(inFolder+filename, 'PNG')
-#             images.append(im)
-#             continue
-#         else:
-#             continue
-#     f = os.path.join(inFolder, name)
-#     imageio.mimsave(f, images)
-
 CONTENT_WEIGHT = 5e0
 CONTENT_WEIGHT_BLEND = 1
 STYLE_WEIGHT = 5e2
@@ -137,6 +102,40 @@ def build_parser():
             metavar='POOLING', default=POOLING)
     return parser
 
+def extractFrames(inGif, outFolder):
+    frame = Image.open(inGif)
+    nframes = 0
+    frames = []
+    while frame:
+        frame.save(outFolder+'/'+str(nframes)+'.png', 'PNG')
+        frames.append(frame)
+        nframes += 1
+        try:
+            frame.seek(nframes)
+        except EOFError:
+            break;
+    return frames
+
+def get_filenames(folder):
+    filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
+    def getint(name):
+        basename = name.split('.')[0]
+        return int(basename)
+    filenames.sort(key=getint)
+    return filenames
+
+# def create_gif(name, inFolder):
+#     filenames = get_filenames(inFolder)
+#     images = []
+#     for filename in filenames:
+#         if filename.endswith(".png"): 
+#             im = imageio.imread(inFolder+filename, 'PNG')
+#             images.append(im)
+#             continue
+#         else:
+#             continue
+#     f = os.path.join(inFolder, name)
+#     imageio.mimsave(f, images)
 
 if __name__ == '__main__':
     # frames = extractFrames("content/panda.gif", "content/panda/tmp")
