@@ -139,19 +139,19 @@ def get_filenames(folder):
 
 if __name__ == '__main__':
     # frames = extractFrames("content/panda.gif", "content/panda/tmp")
-    prefix = "content/panda/tmp/"
+    prefix = "content/panda/in/"
     frames = get_filenames(prefix)
     parser = build_parser()
     options = parser.parse_args()
 
     options.initial = None
     options.content = prefix+frames[0]
-    options.output = "content/panda/tmp/p_0.jpg"
+    options.output = "content/panda/out/p_0.jpg"
     for i in range(1,len(frames)):
         neural_style.main(parser, options)
         options.initial = options.output
         options.content = prefix+frames[i]
-        options.output = "content/panda/tmp/p_"+str(i)+".jpg"
+        options.output = "content/panda/out/p_"+str(i)+".jpg"
     neural_style.main(parser, options)
 
 
