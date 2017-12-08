@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import numpy as np
 import tensorflow as tf
 import vgg
@@ -129,8 +130,8 @@ def stylize(network, initial, initial_noiseblend, content, styles, luminance_tra
             stderr.write('Optimization started...\n')
             if (print_iterations and print_iterations != 0):
                 print_progress()
-            for i in range(iterations):
-                stderr.write('Iteration %4d/%4d\n' % (i + 1, iterations))
+            for i in tqdm(range(iterations)):
+                #stderr.write('Iteration %4d/%4d\n' % (i + 1, iterations))
                 train_step.run()
 
                 last_step = (i == iterations - 1)
