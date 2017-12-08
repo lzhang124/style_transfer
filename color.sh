@@ -16,7 +16,7 @@ col='rgb-lin
     lab-pca
     lab-rot'
 
-# python neural_style.py --content content/flowers_small.jpg --styles style/Robert_Delaunay,_1906,_Portrait.jpg --output output/flowers-luminance.jpg --luminance-transfer
+python neural_style.py --content content/flowers_small.jpg --styles style/Robert_Delaunay,_1906,_Portrait.jpg --output output/flowers-luminance.jpg --luminance-transfer
 
 for c in $col
 do
