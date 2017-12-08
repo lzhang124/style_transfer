@@ -116,13 +116,13 @@ def build_parser():
 #             break;
 #     return frames
 
-# def get_filenames(folder):
-#     filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
-#     def getint(name):
-#         basename = name.split('.')[0]
-#         return int(basename)
-#     filenames.sort(key=getint)
-#     return filenames
+def get_filenames(folder):
+    filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
+    def getint(name):
+        basename = name.split('.')[0]
+        return int(basename)
+    filenames.sort(key=getint)
+    return filenames
 
 def create_gif(name, inFolder):
     filenames = get_filenames(inFolder)
