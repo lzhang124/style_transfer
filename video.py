@@ -151,7 +151,7 @@ if __name__ == '__main__':
     for i in range(1,len(frames)):
         neural_style.main(parser, options)
         options.initial = prefix+frames[i-1]
-        options.content = prefix+frames[i]
+        options.content = options.output
         options.output = "content/panda/tmp/fp_"+str(i)+".jpg"
     neural_style.main(parser, options)
 
