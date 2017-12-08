@@ -102,6 +102,9 @@ def build_parser():
     return parser
 
 def main(parser, options):
+    print("options.initial: ", options.initial)
+    print("options.content: ", options.content)
+    print("options.output: ", options.output)
     if not os.path.isfile(options.network):
         parser.error("Network %s does not exist." % options.network)
 
