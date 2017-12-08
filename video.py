@@ -102,40 +102,40 @@ def build_parser():
             metavar='POOLING', default=POOLING)
     return parser
 
-def extractFrames(inGif, outFolder):
-    frame = Image.open(inGif)
-    nframes = 0
-    frames = []
-    while frame:
-        frame.save(outFolder+'/'+str(nframes)+'.png', 'PNG')
-        frames.append(frame)
-        nframes += 1
-        try:
-            frame.seek(nframes)
-        except EOFError:
-            break;
-    return frames
+# def extractFrames(inGif, outFolder):
+#     frame = Image.open(inGif)
+#     nframes = 0
+#     frames = []
+#     while frame:
+#         frame.save(outFolder+'/'+str(nframes)+'.png', 'PNG')
+#         frames.append(frame)
+#         nframes += 1
+#         try:
+#             frame.seek(nframes)
+#         except EOFError:
+#             break;
+#     return frames
 
-def get_filenames(folder):
-    filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
-    def getint(name):
-        basename = name.split('.')[0]
-        return int(basename)
-    filenames.sort(key=getint)
-    return filenames
+# def get_filenames(folder):
+#     filenames = [filename for filename in os.listdir(folder) if filename.endswith(".png")]
+#     def getint(name):
+#         basename = name.split('.')[0]
+#         return int(basename)
+#     filenames.sort(key=getint)
+#     return filenames
 
-# def create_gif(name, inFolder):
-#     filenames = get_filenames(inFolder)
-#     images = []
-#     for filename in filenames:
-#         if filename.endswith(".png"): 
-#             im = imageio.imread(inFolder+filename, 'PNG')
-#             images.append(im)
-#             continue
-#         else:
-#             continue
-#     f = os.path.join(inFolder, name)
-#     imageio.mimsave(f, images)
+def create_gif(name, inFolder):
+    filenames = get_filenames(inFolder)
+    images = []
+    for filename in filenames:
+        if filename.endswith(".png"): 
+            im = imageio.imread(inFolder+filename, 'PNG')
+            images.append(im)
+            continue
+        else:
+            continue
+    f = os.path.join(inFolder, name)
+    imageio.mimsave(f, images)
 
 if __name__ == '__main__':
     # frames = extractFrames("content/panda.gif", "content/panda/tmp")
@@ -144,14 +144,14 @@ if __name__ == '__main__':
     parser = build_parser()
     options = parser.parse_args()
 
-    options.initial = None
+    # options.initial = None
     options.content = prefix+frames[0]
-    options.output = "content/panda/out/0.jpg"
+    options.output = "content/panda/out2/0.jpg"
     for i in range(1,len(frames)):
         neural_style.main(parser, options)
-        options.initial = options.output
+        # options.initial = options.output
         options.content = prefix+frames[i]
-        options.output = "content/panda/out/"+str(i)+".jpg"
+        options.output = "content/panda/out2/"+str(i)+".jpg"
     neural_style.main(parser, options)
 
 
