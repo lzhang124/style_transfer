@@ -39,17 +39,19 @@ Neural style transfer has automated the otherwise painstaking manual process of 
 
 \begin{figure*}[ht]
 \centering
-\begin{subfigure}[b]{0.39\linewidth}
+\begin{subfigure}[b]{0.38\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/flowers.jpg}
   \caption{Content}
 \end{subfigure}
-\begin{subfigure}[b]{0.195\linewidth}
+\quad
+\begin{subfigure}[b]{0.19\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/delaunay.jpg}
   \caption{Style}
 \end{subfigure}
-\begin{subfigure}[b]{0.39\linewidth}
+\quad
+\begin{subfigure}[b]{0.38\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/flowers-delaunay.jpg}
   \caption{Output}
@@ -80,12 +82,13 @@ The second method described in~\cite{gatys-color} is called luminance transfer. 
 
 \begin{figure*}[ht]
 \centering
-\begin{subfigure}[b]{0.49\linewidth}
+\begin{subfigure}[b]{0.48\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/flowers-rgb-eig.jpg}
   \caption{Color mapping}
 \end{subfigure}
-\begin{subfigure}[b]{0.49\linewidth}
+\quad
+\begin{subfigure}[b]{0.48\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/flowers-luminance.jpg}
   \caption{Luminance transfer}
@@ -100,7 +103,7 @@ Figure~\ref{fig:color-orig} shows a comparison of the color mapping and luminanc
 The simplest and most common approach for applying neural style to a video is to extract the sequence of frames and individually pass each image into the algorithm, as in regular neural style transfer. More sophisticated approaches use more intelligent initialization images, rather than random noise. In~\cite{video1}, the authors enforce a constraint that encourages minimal deviations between two frames that accounts for extreme movement and occlusions. The authors of~\cite{video2} also explore other loss functions that maintain temporal consistency between frames, while still maintaining reasonable processing time.
 
 \section{Approach}
-We utilize an open-source tensorflow implementation of the original neural style transfer algorithm~\cite{neuralstyle}. This implementation uses a VGG19 CNN pretrained on the ImageNet dataset~\cite{vgg}. All color and video extensions are integrated with the open-source implementation for end-to-end functionality.
+We utilize an open-source tensorflow implementation of the original neural style transfer algorithm~\cite{neuralstyle}. This implementation uses a VGG19 CNN pretrained on the ImageNet dataset~\cite{vgg}. All color and video extensions are integrated with the open-source implementation for end-to-end functionality. All images in this report were generated after 1000 iterations of the algorithm.
 
 \subsection{Color Preservation}
 To improve the color mapping algorithm presented in~\cite{gatys-color}, we look at modifying the transformation used to match the colors of the style image with those of the content image. Rather than simply performing a linear shift and rescale on the RGB values of the style image, we explore three color mapping algorithms described in~\cite{color}. Each of these algorithms produces a color-mapped version of the style image, which is then used with the content image in neural style transfer.
@@ -137,15 +140,14 @@ To extend the neural style transfer algorithm to work with video content, we dir
 
 \begin{figure*}[ht]
 \centering
-\includegraphics[width=0.49\linewidth]{imgs/panda1.png}
-\includegraphics[width=0.49\linewidth]{imgs/panda2.png}
+\includegraphics[width=0.48\linewidth]{imgs/panda1.png}
+\quad
+\includegraphics[width=0.48\linewidth]{imgs/panda2.png}
 \caption{Two consecutive frames of a stylized video sequence. The circles emphasize stylistic discontinuity between the two consecutive frames, which causes the resulting video to jitter.}
 \label{fig:video-orig}
 \end{figure*}
 
-Our approach to mitigating this problem by initializing each frame with the output of the previous frame. This way, instead of generating a new output from random noise, we are using a visually similar image as a starting point.
-
-In theory, this method also reduces computation time. Since the content and style do not change greatly between frames, we need fewer iterations to process frames after the first.
+Our approach to mitigating this problem is to initialize each frame with the output of the previous frame. This way, instead of generating a new output from random noise, we are using a visually similar image as a starting point. Ideally, the calculated loss of this new initial image is smaller than that of random noise, so fewer updates are needed. In theory, this method also reduces computation time. Since the content and style do not change greatly between frames, we need fewer iterations to process frames after the first.
 
 \section{Results}
 \subsection{Color Preservation}
@@ -156,12 +158,13 @@ Figure~\ref{fig:color-result} shows the results of performing neural style trans
 
 \begin{figure*}[ht]
 \centering
-\begin{subfigure}[b]{0.49\linewidth}
+\begin{subfigure}[b]{0.48\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/flowers-lab-lin.jpg}
   \caption{$l\alpha\beta$ colorspace}
 \end{subfigure}
-\begin{subfigure}[b]{0.49\linewidth}
+\quad
+\begin{subfigure}[b]{0.48\linewidth}
   \centering
   \includegraphics[width=\linewidth]{imgs/flowers-ycbcr-lin.jpg}
   \caption{YUV colorspace}
@@ -170,53 +173,63 @@ Figure~\ref{fig:color-result} shows the results of performing neural style trans
 \label{fig:color-result}
 \end{figure*}
 
-While both images do still retain the dependence between luminance and color (strokes line up with colors), neither preserves the original color distribution of the content image well. The $l\alpha\beta$ colorspace result seems to have a reddish hue, which is likely due to imperfect colorspace conversions (RGB must first be converted to XYZ before being converted into $l\alpha\beta$). The YUV colorspace result also contains artifacts of colors present in the original style image, but not in the original content image (teal-colored flowers and leaves).
+While both images still retain the dependence between luminance and color (colors remain constant withing individual strokes), neither preserves the original color distribution of the content image well. The $l\alpha\beta$ colorspace result seems to have a reddish hue, which is likely due to imperfect colorspace conversions (RGB must first be converted to XYZ before being converted into $l\alpha\beta$). The YUV colorspace result also contains artifacts of colors present in the original style image, but not in the original content image (teal-colored flowers and leaves).
+
+\begin{figure*}[ht]
+\centering
+\begin{minipage}{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{imgs/flowers-rgb-pca.jpg}
+\caption{Style transfer result after principal component matching.}
+\label{fig:pca-result}
+\end{minipage}
+\quad
+\begin{minipage}{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{imgs/flowers-rgb-rot.jpg}
+\caption{Style transfer result after principal component matching.}
+\label{fig:rot-result}
+\end{minipage}
+\end{figure*}
 
 \bigbreak\noindent\textbf{PCA transform.}
 Figure~\ref{fig:pca-result} shows the result of performing neural style transfer using the style image generated by matching the principal components of the original content and style images. We again use the same content image as before.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.98\linewidth]{imgs/flowers-rgb-pca.jpg}
-\caption{Style transfer result after principal component matching.}
-\label{fig:pca-result}
-\end{figure}
-
-The vividness of the colors in this image are much more similar to those from the luminance transfer. However, the image's contrast is unnatural and unrepresentative of the color distribution in the original content image. This is because using PCA will transfer the large range
+The colors in this image are much more similar to those in the original content image. However, the image's contrast is unnatural and unrepresentative of the content's color distribution. This is because our PCA method will effectively rotate the pixel values to match in color, but does nothing to regulate the variance in the rotated values. Thus, the high variance in the intensity of pixels in the Delaunay style image is also transferred to the result, causing higher contrast in the output.
 
 \bigbreak\noindent\textbf{Random rotations.}
-TODO
+Figure~\ref{fig:rot-result} shows the result of performing neural style transfer using the style image generated by using the random rotations method. We use the same content image as before.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.98\linewidth]{imgs/flowers-rgb-rot.jpg}
-\caption{YUV colorspace, using standard deviation}
-\label{fig:rot-result}
-\end{figure}
+Visually, this approach seems to produce the best results in terms of matching the original colors from the content image. Thus, it leverages the benefits from both the original color mapping and luminance transfer algorithms described in~\cite{gatys-color}: color is accurately preserved in the output image, and dependency between luminance and color is maintained.
 
 \subsection{Video}
-FIXME
-The results of using the output corresponding to the previous frame as the initialization image are shown in Figure~\ref{fig:video-final}. It is especially noticeable in the circled parts of the images that the frames are more similar. 
-
 \begin{figure*}[ht]
 \centering
-\includegraphics[width=0.49\linewidth]{imgs/pandap1.png}
-\includegraphics[width=0.49\linewidth]{imgs/pandap2.png}
-\caption{Two consecutive frames of a stylized video sequence where the previous output is used in initialization. Note how the circled regions are more visually similar than those in Figure~\ref{fig:video-orig}.}
+\includegraphics[width=0.48\linewidth]{imgs/pandap1.png}
+\quad
+\includegraphics[width=0.48\linewidth]{imgs/pandap2.png}
+\caption{Two consecutive frames of a stylized video sequence where the previous output is used in initialization. Circled regions are now more visually similar to each other.}
 \label{fig:video-final}
 \end{figure*}
 
-When viewing the entire video sequence, however, there is still a significant amount of discontinuity. This occurs because TODO (something about stuff at pixel level??) The entire video can be viewed at \url{https://media.giphy.com/media/3oxHQgEvUcU8kvOifS/giphy.gif}. 
+The results of using the output of each frame as the initialization image of the next frame can be found at at \url{https://media.giphy.com/media/3oxHQgEvUcU8kvOifS/giphy.gif}. Figure~\ref{fig:video-final} shows two consecutive frames of the new video output. Observe that the circled parts of the frames are more similar in terms of stroke color, shape, and orientation than the example in Figure~\ref{fig:video-orig}.
 
-To improve upon this method, we would explore enforcing consistency through the use of an extra loss function. This would penalize large discrepancies between consecutive video frames.
+When viewing the entire video sequence, however, there is still a significant amount of discontinuity between frames. This occurs because the loss calculation in neural style transfer is computed per pixel, and thus does not take into account regional similarities. When pixel values shift between frames due to movement in the scene, the initial image may visually look like our desired target, but the pixel-based loss may still be large. Thus, the calculated updates from back-propagation may still result in dramatic differences between consecutive frames. To improve upon this method, we would explore ways to penalize large discrepancies between consecutive video frames, such as enforcing consistency through the use of a different loss function.
+
+Because our generated videos did not maintain temporal consistency, we did not explore reducing the required processing time for frames after the first.
 
 \section{Conclusion}
-FIXME
-Many recent advances in neural style transfer have automated the process of creating artwork with a specific style. While these methods accurately capture the style and content of the input images, other details such as color, are not so effectively preserved. In many cases, transferring the texture and strokes of the style image while preserving the color of the content image is desired. We explore three different methods for preserving color. The first is TODO. Also we do TODO. And TODO. We also perform neural style transfer on videos rather than images. We show that initializing the image with the output corresponding to the previous frame results in a slightly less jarring viewing experience. However, more improvements could be made by incorporating a loss function into the neural architecture that encourages consecutive frames to be more similar, resulting in a smoother video.
+Many recent advances in neural style transfer have automated the process of creating artwork with a specific style. While these methods accurately capture the style and content of the input images, other details such as color, are not so effectively transfered, but this preservation may be desired. We explore three different methods for preserving color: color mapping using different colorspaces, PCA transformation, and random rotations. We also implement neural style transfer from images to videos. We show that initializing the image with the output of the previous frame results in a slightly less jarring viewing experience.
+
+\subsection{Future Work}
+Our PCA color mapping implementation transfers intensity variation from the style image to the newly generated one. Thus, future work will involve regulating this variance by taking into account the variance explained by each of the principal components.
+
+The random rotation color mapping, though effective, can also be improved. We use simple linear mean and standard deviation matching in the rotated space, but more complex matching may generate better results. For example, histogram matching in the rotated space will generate a style image with a color distribution much closer to that of the content image.
+
+Finally, for video support, we would like to explore the use of a more sophisticated loss function that will effectively encourage continuity between consecutive frames. We would also investigate if this new method can be used to decrease computation time by reducing the number of iterations required to generate frames past the first.
 
 \section{Individual Contribution}
-TODO
-Maecenas consequat, ligula non cursus pharetra, libero felis pretium orci, varius luctus libero metus ac ex. Aliquam aliquam fringilla odio, id consectetur massa accumsan quis. Nam venenatis, nisi id hendrerit consectetur, diam tortor aliquet mi, non consequat nunc velit id elit. Vestibulum facilisis eros non dui vehicula sollicitudin. Pellentesque sit amet massa luctus, luctus elit et, lacinia leo. Nunc vel risus posuere, vestibulum sapien quis, iaculis ex. Integer sit amet dui mi. Aenean venenatis nunc a augue tempus porta. Integer fringilla est in nunc blandit condimentum. Etiam vitae nulla at magna vestibulum lobortis.
+Together with Christina, we read through the relevant previous work to ensure that both of us had a good understanding of how neural style transfer worked. Later, we collaboratively set up the open-source neural style transfer model. I then focused on improving the model to preserve color in the output, while Christina focused on adding style transfer functionality for video. We met frequently to help each other with pain points, and ultimately wrote the paper together.
 
 {\small
 \bibliographystyle{ieee}
