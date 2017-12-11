@@ -65,7 +65,7 @@ From Figure~\ref{fig:orig}, we see that while the output successfully transfers 
 Additionally, the original method described in ~\cite{gatys-orig} applies strictly to transferring the style of an image to another image. We also explore an extension to the original algorithm that attempts to transfer the style of an image to an entire video sequence.
 
 \section{Related Work}
-At a high level, neural style transfer involves modifying an initial image consisting of white noise and iteratively modifying pixels to resemble a desired target whose content is similar to the content image, and whose style is similar to the style image. To achieve this effect, the algorithm back-propagates the outputs of various layers of a pretrained CNN model in order to minimize the content and style losses. As a result, the initial random noise transforms into an image with the desired content and style.
+At a high level, neural style transfer involves modifying an initial image consisting of white noise and iteratively changing pixels to resemble a desired target whose content is similar to the content image, and whose style is similar to the style image. To achieve this effect, the algorithm back-propagates the outputs of various layers of a pretrained CNN model in order to minimize the content and style losses. As a result, the initial random noise transforms into an image with the desired content and style.
 
 \subsection{Color Preservation}
 In~\cite{gatys-color}, the same author of the original neural style transfer algorithm explores two methods for preserving color in the output image.
@@ -106,7 +106,7 @@ The simplest and most common approach for applying neural style to a video is to
 We utilize an open-source tensorflow implementation of the original neural style transfer algorithm~\cite{neuralstyle}. This implementation uses a VGG19 CNN pretrained on the ImageNet dataset~\cite{vgg}. All color and video extensions are integrated with the open-source implementation for end-to-end functionality. All images in this report were generated after 1000 iterations of the algorithm.
 
 \subsection{Color Preservation}
-To improve the color mapping algorithm presented in~\cite{gatys-color}, we look at modifying the transformation used to match the colors of the style image with those of the content image. Rather than simply performing a linear shift and rescale on the RGB values of the style image, we explore three color mapping algorithms described in~\cite{color}. Each of these algorithms produces a color-mapped version of the style image, which is then used with the content image in neural style transfer.
+To improve the color mapping algorithm presented in~\cite{gatys-color}, we look at modifying the transformation used to match the colors of the style image with those of the content image. Rather than simply performing a linear shift and rescaling on the RGB values of the style image, we explore three color mapping algorithms described in~\cite{color}. Each of these algorithms produces a color-mapped version of the style image, which is then used with the content image in neural style transfer.
 
 \bigbreak\noindent\textbf{Different colorspaces.}
 Working with individual channels of the RGB colorspace may not be ideal since the channels are highly correlated. By using a less correlated colorspace, we can linearly shift and scale each channel independently without worrying about inter-channel relationships. Here, we explore two colorspaces, $l\alpha\beta$~\cite{lab} and YUV.
