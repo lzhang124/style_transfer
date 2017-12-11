@@ -107,7 +107,9 @@ def pca(content, style):
     pca_c.fit(flat_c)
     pca_s.fit(flat_s)
 
-    mapped = pca_c.inverse_transform(pca_s.transform(flat_s)).reshape(style.shape)
+    mapped = pca_s.transform(flat_s) / pca_s.explained_variance_
+    mapped = pca_c.inverse_transform(mapped) * pca_c.explained_variance_
+    mapped = mapped.reshape(style.shape)
     return np.clip(mapped, 0, 255)
 
 def rot(content, style, iters=10):
