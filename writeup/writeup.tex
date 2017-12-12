@@ -136,7 +136,7 @@ The updates during a single iteration are summarized below:
 where $x_i$ represents a pixel in image $i$ in the rotated space defined by $R$.
 
 \subsection{Video}
-To extend the neural style transfer algorithm to work with video content, we directly feed individual frames into the algorithm. The original, unmodified implementation initializes each frame with random noise. Therefore, the styles of the outputs may emerge differently for consecutive frames. As a result, the stylized video will appear segmented and jittery, since there is no continuity between frames. This is emphasized by the circles in Figure~\ref{fig:video-orig}, which highlights a dramatic style difference between two consecutive output frames in a video sequence. The entire video using the original neural style implementation can be viewed at \url{https://media.giphy.com/media/l3mZ1zQv2uObq9kKk/giphy.gif}.
+To extend the neural style transfer algorithm to work with video content, we directly feed individual frames into the algorithm. The original, unmodified implementation initializes each frame with random noise. Therefore, the styles of the outputs may emerge differently for consecutive frames. The stylized video will appear segmented and jittery, since there is no continuity between frames. This is emphasized by the circles in Figure~\ref{fig:video-orig}, which highlight a dramatic style difference between two consecutive output frames in a video sequence. The entire video using the original neural style implementation can be viewed at \url{https://media.giphy.com/media/l3mZ1zQv2uObq9kKk/giphy.gif}.
 
 \begin{figure*}[ht]
 \centering
@@ -187,7 +187,7 @@ While both images still retain the dependence between luminance and color (color
 \begin{minipage}{0.48\linewidth}
 \centering
 \includegraphics[width=\linewidth]{imgs/flowers-rgb-rot.jpg}
-\caption{Style transfer result after principal component matching.}
+\caption{Style transfer result after random rotation matching.}
 \label{fig:rot-result}
 \end{minipage}
 \end{figure*}
@@ -212,14 +212,14 @@ Visually, this approach seems to produce the best results in terms of matching t
 \label{fig:video-final}
 \end{figure*}
 
-The results of using the output of each frame as the initialization image of the next frame can be found at at \url{https://media.giphy.com/media/3oxHQgEvUcU8kvOifS/giphy.gif}. Figure~\ref{fig:video-final} shows two consecutive frames of the new video output. Observe that the circled parts of the frames are more similar in terms of stroke color, shape, and orientation than the example in Figure~\ref{fig:video-orig}.
+The results of using the output of each frame as the initialization image of the next frame can be found at \url{https://media.giphy.com/media/3oxHQgEvUcU8kvOifS/giphy.gif}. Figure~\ref{fig:video-final} shows two consecutive frames of the new video output. Observe that the circled parts of the frames are more similar in terms of stroke color, shape, and orientation than the example in Figure~\ref{fig:video-orig}.
 
 When viewing the entire video sequence, however, there is still a significant amount of discontinuity between frames. This occurs because the loss calculation in neural style transfer is computed per pixel, and thus does not take into account regional similarities. When pixel values shift between frames due to movement in the scene, the initial image may visually look like our desired target, but the pixel-based loss may still be large. Thus, the calculated updates from back-propagation may still result in dramatic differences between consecutive frames. To improve upon this method, we would explore ways to penalize large discrepancies between consecutive video frames, such as enforcing consistency through the use of a different loss function.
 
 Because our generated videos did not maintain temporal consistency, we did not explore reducing the required processing time for frames after the first.
 
 \section{Conclusion}
-Many recent advances in neural style transfer have automated the process of creating artwork with a specific style. While these methods accurately capture the style and content of the input images, other details such as color, are not so effectively transfered, but this preservation may be desired. We explore three different methods for preserving color: color mapping using different colorspaces, PCA transformation, and random rotations. We also implement neural style transfer from images to videos. We show that initializing the image with the output of the previous frame results in a slightly less jarring viewing experience.
+Many recent advances in neural style transfer have automated the process of creating artwork with a specific style. While these methods accurately capture the style and content of the input images, other details such as color, are not so effectively transferred. However, this preservation may be desired. We explore three different methods for preserving color: color mapping using different colorspaces, PCA transformation, and random rotations. We also implement neural style transfer from images to videos. We show that initializing the image with the output of the previous frame results in a slightly less jarring viewing experience.
 
 \subsection{Future Work}
 Our PCA color mapping implementation transfers intensity variation from the style image to the newly generated one. Thus, future work will involve regulating this variance by taking into account the variance explained by each of the principal components.
